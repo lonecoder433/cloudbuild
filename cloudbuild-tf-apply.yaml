@@ -34,7 +34,7 @@ steps:
   args: 
   - '-c'
   - |
-        terraform apply $BUILD_ID --auto-approve
+        terraform apply $BUILD_ID
 
 substitutions:
   _GCS_BUCKET: gcp_test_terraform_test
