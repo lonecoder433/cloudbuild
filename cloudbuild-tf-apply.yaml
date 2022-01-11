@@ -1,0 +1,45 @@
+timeout: 1200s
+steps:
+- id: 'setup'
+  name: 'hashicorp/terraform'
+  entrypoint: 'sh'
+  args:
+  - -c
+  - |
+    echo "Adding bucket information to backends"
+    for i in `find -name 'backend.tf'`; do sed -i 's/UPDATE_ME/${_STATE_BUCKET_NAME}/' $i; done
+- id: 'tf init'
+  name: 'hashicorp/terraform'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+        terraform init \
+#        -backend-config="bucket=${_GCS_BUCKET}" \
+#        -backend-config="prefix=${_GCS_BUCKET_PREFIX}"\
+#        -backend-config="credentials="sa.json"
+# [START tf-plan]
+- id: 'tf plan'
+  name: 'hashicorp/terraform'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+        terraform plan -out=$BUILD_ID
+        terraform plan -no-color > plan.txt
+
+- id: 'tf apply'
+  name: 'hashicorp/terraform'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - |
+        terraform apply $BUILD_ID --auto-approve
+
+substitutions:
+  _GCS_BUCKET: gcp_test_terraform_test
+  _GCS_BUCKET_PREFIX: sftp-gcsss
+artifacts:
+  objects:
+    location: 'gs://${_ARTIFACT_BUCKET_NAME}/terraform/cloudbuild/plan/${BUILD_ID}'
+    paths: ['$BUILD_ID', 'plan.txt']
