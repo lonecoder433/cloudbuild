@@ -1,6 +1,6 @@
 variable "bucketnames" {
   type        = list(string)
-  default     = ["test1"]
+  default     = ["test1","demo"]
 }
 
 variable "cloud_source_repos" {
